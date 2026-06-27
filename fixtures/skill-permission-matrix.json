@@ -1,0 +1,13 @@
+{
+  "allowedTools": [
+    "exec",
+    "file_fetch",
+    "message",
+    "web_fetch"
+  ],
+  "approvalPhrases": [
+    "explicit approval",
+    "reviewer confirmation",
+    "requires explicit approval"
+  ]
+}

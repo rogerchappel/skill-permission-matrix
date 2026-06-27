@@ -28,7 +28,8 @@
     "check": "tsc -p tsconfig.json --noEmit",
     "test": "node --test dist/**/*.test.js",
     "pretest": "npm run build",
-    "smoke": "npm run build && node dist/src/cli.js scan fixtures/skills --format markdown"
+    "smoke": "npm run build && node dist/src/cli.js scan fixtures/skills --format markdown",
+    "validate": "bash scripts/validate.sh"
   },
   "keywords": [
     "agent-skills",

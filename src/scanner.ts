@@ -5,7 +5,7 @@ import { defaultConfig } from "./config.js";
 import type { MatrixConfig, ScanOptions, ScanResult, SkillPermissionRow } from "./types.js";
 
 const liveActionWords = /\b(send|post|publish|delete|update|create|merge|approve|install|deploy|charge|email|notify)\b/i;
-const writeWords = /\b(write|edit|modify|delete|create|save|append|overwrite|apply_patch)\b/i;
+const writeWords = /\b(write|edit|modify|update|delete|create|save|append|overwrite|apply_patch)\b/i;
 const networkWords = /\b(network|http|https|api|web|external service|internet|fetch|download|upload)\b/i;
 const broadWords = /\b(any|all|every|entire|unrestricted|full access|outside the workspace)\b/i;
 
@@ -50,7 +50,9 @@ async function analyzeSkill(root: string, file: string, config: MatrixConfig): P
   const tools = extractTools(content);
   const inputs = extractList(sections, ["required inputs", "inputs"]);
   const externalActions = matchingLines(lines, liveActionWords);
-  const filesystemWrites = matchingLines(lines, writeWords).filter((line) => /\b(file|filesystem|workspace|write|edit|modify|delete|create|save|apply_patch)\b/i.test(line));
+  const filesystemWrites = matchingLines(lines, writeWords)
+    .filter((line) => /\b(file|filesystem|workspace|write|edit|modify|update|delete|create|save|apply_patch)\b/i.test(line))
+    .filter((line) => !/^\s*-\s*does not\b/i.test(line));
   const networkClaims = matchingLines(lines, networkWords);
   const approvalRequirements = extractApprovalLines(lines, config.approvalPhrases);
   const validationCommands = extractCodeCommands(content);

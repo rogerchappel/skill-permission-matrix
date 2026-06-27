@@ -1,0 +1,36 @@
+{
+  "name": "skill-permission-matrix",
+  "version": "0.1.0",
+  "description": "Review required tools, side effects, and approval boundaries across agent SKILL.md files.",
+  "type": "module",
+  "bin": {
+    "skill-permission-matrix": "./dist/cli.js"
+  },
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "SKILL.md",
+    "docs"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "check": "tsc -p tsconfig.json --noEmit",
+    "test": "node --test dist/**/*.test.js",
+    "pretest": "npm run build",
+    "smoke": "npm run build && node dist/cli.js scan fixtures/skills --format markdown"
+  },
+  "keywords": [
+    "agent-skills",
+    "permissions",
+    "approval",
+    "cli"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.8.0"
+  }
+}

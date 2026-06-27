@@ -3,8 +3,8 @@ import { describe, it } from "node:test";
 
 import { loadConfig, renderJson, renderMarkdown, scanSkills } from "../src/index.js";
 
-const fixtureRoot = new URL("../fixtures/skills", import.meta.url).pathname;
-const configPath = new URL("../fixtures/skill-permission-matrix.json", import.meta.url).pathname;
+const fixtureRoot = new URL("fixtures/skills", `file://${process.cwd()}/`).pathname;
+const configPath = new URL("fixtures/skill-permission-matrix.json", `file://${process.cwd()}/`).pathname;
 
 describe("scanSkills", () => {
   it("discovers skills and extracts permission fields", async () => {

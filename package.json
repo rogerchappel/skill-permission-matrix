@@ -2,6 +2,14 @@
   "name": "skill-permission-matrix",
   "version": "0.1.0",
   "description": "Review required tools, side effects, and approval boundaries across agent SKILL.md files.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rogerchappel/skill-permission-matrix.git"
+  },
+  "homepage": "https://github.com/rogerchappel/skill-permission-matrix#readme",
+  "bugs": {
+    "url": "https://github.com/rogerchappel/skill-permission-matrix/issues"
+  },
   "type": "module",
   "bin": {
     "skill-permission-matrix": "./dist/src/cli.js"
@@ -20,7 +28,8 @@
     "check": "tsc -p tsconfig.json --noEmit",
     "test": "node --test dist/**/*.test.js",
     "pretest": "npm run build",
-    "smoke": "npm run build && node dist/src/cli.js scan fixtures/skills --format markdown"
+    "smoke": "npm run build && node dist/src/cli.js scan fixtures/skills --format markdown",
+    "validate": "bash scripts/validate.sh"
   },
   "keywords": [
     "agent-skills",

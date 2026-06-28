@@ -1,0 +1,14 @@
+{
+  "allowedTools": [
+    "exec",
+    "file_fetch",
+    "web_fetch",
+    "message"
+  ],
+  "approvalPhrases": [
+    "explicit approval",
+    "reviewer confirmation",
+    "requires approval",
+    "outside this skill"
+  ]
+}

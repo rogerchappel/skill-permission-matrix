@@ -13,7 +13,7 @@ const actionScopeRoot = new URL("test/fixtures/action-scope", `file://${process.
 describe("scanSkills", () => {
   it("discovers skills and extracts permission fields", async () => {
     const result = await scanSkills(fixtureRoot);
-    assert.equal(result.summary.skillCount, 4);
+    assert.equal(result.summary.skillCount, 5);
     const draft = result.rows.find((row) => row.name === "Draft Only Follow-up");
     assert.ok(draft);
     assert.deepEqual(draft.tools, ["exec"]);
@@ -168,6 +168,17 @@ describe("scanSkills", () => {
       await rm(root, { recursive: true, force: true });
     }
   });
+
+  it("accepts explicitly approved social posting boundaries", async () => {
+    const result = await scanSkills(fixtureRoot);
+    const social = result.rows.find((row) => row.name === "Approved Social Posting");
+    assert.ok(social);
+    assert.deepEqual(social.tools, ["web_fetch", "message"]);
+    assert.ok(social.externalActions.some((line) => line.includes("publish a public reply")));
+    assert.ok(social.networkClaims.some((line) => line.includes("external web evidence")));
+    assert.ok(social.approvalRequirements.some((line) => line.includes("requires explicit approval")));
+    assert.deepEqual(social.warnings, []);
+  });
 });
 
 describe("renderers", () => {
@@ -182,6 +193,6 @@ describe("renderers", () => {
   it("renders parseable json", async () => {
     const result = await scanSkills(fixtureRoot);
     const parsed = JSON.parse(renderJson(result));
-    assert.equal(parsed.summary.skillCount, 4);
+    assert.equal(parsed.summary.skillCount, 5);
   });
 });

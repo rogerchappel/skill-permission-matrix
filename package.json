@@ -35,7 +35,8 @@
     "smoke": "npm run build && node dist/src/cli.js scan fixtures/skills --format markdown",
     "validate": "bash scripts/validate.sh",
     "package:smoke": "npm run build && npm pack --dry-run",
-    "release:check": "npm run check && npm test && npm run smoke && npm run validate && npm run package:smoke"
+    "release:check": "npm run check && npm test && npm run smoke && npm run validate && npm run package:smoke",
+    "lint": "npm run check"
   },
   "keywords": [
     "agent-skills",

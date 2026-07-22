@@ -22,6 +22,16 @@ node dist/cli.js scan fixtures/skills --format json --config fixtures/skill-perm
 skill-permission-matrix scan <dir> [--format markdown|json] [--config file] [--out file]
 ```
 
+## Library API
+
+The package exports `loadConfig`, `renderJson`, `renderMarkdown`, and `scanSkills`:
+
+```js
+import { scanSkills } from "skill-permission-matrix";
+
+const result = await scanSkills("fixtures/skills");
+```
+
 The scanner finds every `SKILL.md` under the target directory and reports:
 
 - declared tools

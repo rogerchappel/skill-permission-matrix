@@ -116,7 +116,25 @@ function matchingLines(lines: string[], pattern: RegExp): string[] {
 
 function extractApprovalLines(lines: string[], phrases: string[]): string[] {
   const lowered = phrases.map((phrase) => phrase.toLowerCase());
-  return unique(lines.map((line) => line.trim()).filter((line) => lowered.some((phrase) => line.toLowerCase().includes(phrase))));
+  return unique(lines.map((line) => line.trim()).filter((line) => {
+    if (line.startsWith("#")) return false;
+    const normalized = line.toLowerCase().replace(/[’]/g, "'");
+    return lowered.some((phrase) => normalized.includes(phrase) && !negatesApproval(normalized, phrase));
+  }));
+}
+
+function negatesApproval(line: string, phrase: string): boolean {
+  const escapedPhrase = escapeRegExp(phrase);
+  const approval = phrase === "approval" ? "(?:explicit\\s+)?approval" : escapedPhrase;
+  const optionalWords = "(?:[a-z-]+\\s+){0,3}";
+  return [
+    new RegExp(`\\bno\\s+${optionalWords}${approval}\\s+(?:is\\s+)?(?:required|needed|necessary)\\b`),
+    new RegExp(`\\b${approval}\\s+(?:(?:is|are|was|were)\\s+)?(?:not|isn't|aren't|wasn't|weren't)\\s*(?:required|needed|necessary)\\b`),
+    new RegExp(`\\b(?:do|does|did)\\s+not\\s+require\\s+${optionalWords}${approval}\\b`),
+    new RegExp(`\\b(?:don't|doesn't|didn't)\\s+require\\s+${optionalWords}${approval}\\b`),
+    new RegExp(`\\brequires?\\s+no\\s+${optionalWords}${approval}\\b`),
+    new RegExp(`\\b(?:may|can|could)\\s+[^.!?]*\\bwithout\\s+${optionalWords}${approval}\\b`)
+  ].some((pattern) => pattern.test(line));
 }
 
 function extractCodeCommands(content: string): string[] {
@@ -153,6 +171,10 @@ function buildWarnings(input: {
 
 function cleanToken(token: string): string {
   return token.replace(/[^a-z0-9_-]/gi, "").trim();
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function unique(values: string[]): string[] {

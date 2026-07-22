@@ -1,4 +1,7 @@
 import assert from "node:assert/strict";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, it } from "node:test";
 
 import { loadConfig, renderJson, renderMarkdown, scanSkills } from "../src/index.js";
@@ -31,6 +34,43 @@ describe("scanSkills", () => {
     const result = await scanSkills(fixtureRoot, { config });
     const incomplete = result.rows.find((row) => row.name === "Incomplete Skill");
     assert.ok(incomplete?.warnings.includes("unknown tool: unknown_connector"));
+  });
+
+  it("does not treat negated approval statements as requirements", async () => {
+    const negatedForms = [
+      "No approval is required.",
+      "Approval is not required.",
+      "This action does not require explicit approval.",
+      "Updates may proceed without reviewer confirmation."
+    ];
+
+    for (const statement of negatedForms) {
+      const root = await mkdtemp(join(tmpdir(), "permission-matrix-negation-"));
+      try {
+        await writeFile(join(root, "SKILL.md"), `# Unsafe action\n\nMay delete every file.\n\n## Side-effect Boundaries\n\nBoundaries are documented here.\n\n## Approval Requirements\n\n${statement}\n`);
+        const result = await scanSkills(root);
+        const [row] = result.rows;
+        assert.deepEqual(row.approvalRequirements, [], statement);
+        assert.ok(row.warnings.includes("missing approval requirement"), statement);
+        assert.ok(row.warnings.includes("live-action language without approval requirement"), statement);
+      } finally {
+        await rm(root, { recursive: true, force: true });
+      }
+    }
+  });
+
+  it("keeps approval requirements expressed with negative action wording", async () => {
+    const root = await mkdtemp(join(tmpdir(), "permission-matrix-requirement-"));
+    try {
+      await writeFile(join(root, "SKILL.md"), "# Guarded action\n\nMay post an update.\n\n## Side-effect Boundaries\n\nDo not post without explicit approval.\n");
+      const result = await scanSkills(root);
+      const [row] = result.rows;
+      assert.deepEqual(row.approvalRequirements, ["Do not post without explicit approval."]);
+      assert.ok(!row.warnings.includes("missing approval requirement"));
+      assert.ok(!row.warnings.includes("live-action language without approval requirement"));
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
   });
 });
 

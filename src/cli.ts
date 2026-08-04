@@ -12,6 +12,8 @@ interface CliArgs {
   out?: string;
 }
 
+class UsageError extends Error {}
+
 async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2));
   if (args.command !== "scan" || !args.dir) {
@@ -31,18 +33,26 @@ async function main(): Promise<void> {
 
 function parseArgs(argv: string[]): CliArgs {
   const args: CliArgs = { command: argv[0], dir: argv[1], format: "markdown" };
+  const seen = new Set<string>();
   for (let index = 2; index < argv.length; index += 1) {
     const value = argv[index];
-    if (value === "--format") args.format = parseFormat(argv[++index]);
-    else if (value === "--config") args.config = argv[++index];
-    else if (value === "--out") args.out = argv[++index];
+    if (value !== "--format" && value !== "--config" && value !== "--out") {
+      throw new UsageError(`Unknown option: ${value}`);
+    }
+    if (seen.has(value)) throw new UsageError(`Option specified more than once: ${value}`);
+    seen.add(value);
+    const optionValue = argv[++index];
+    if (!optionValue || optionValue.startsWith("--")) throw new UsageError(`Missing value for ${value}`);
+    if (value === "--format") args.format = parseFormat(optionValue);
+    else if (value === "--config") args.config = optionValue;
+    else args.out = optionValue;
   }
   return args;
 }
 
 function parseFormat(value: string | undefined): OutputFormat {
   if (value === "json" || value === "markdown") return value;
-  throw new Error(`Unsupported format: ${value ?? ""}`);
+  throw new UsageError(`Unsupported format: ${value ?? ""}`);
 }
 
 function usage(): void {
@@ -51,5 +61,6 @@ function usage(): void {
 
 main().catch((error: unknown) => {
   process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`);
-  process.exitCode = 1;
+  if (error instanceof UsageError) usage();
+  process.exitCode = error instanceof UsageError ? 2 : 1;
 });

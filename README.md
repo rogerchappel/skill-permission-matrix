@@ -22,6 +22,11 @@ node dist/cli.js scan fixtures/skills --format json --config fixtures/skill-perm
 skill-permission-matrix scan <dir> [--format markdown|json] [--config file] [--out file]
 ```
 
+Invalid invocations (including unknown options, missing option values, and repeated
+options) print a short diagnostic plus usage to standard error and exit with status
+2. Runtime failures exit with status 1. Successful scans exit with status 0 and
+write the selected format to standard output, or to the `--out` file when supplied.
+
 ## Library API
 
 The package exports `loadConfig`, `renderJson`, `renderMarkdown`, and `scanSkills`:

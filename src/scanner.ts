@@ -8,6 +8,18 @@ const liveActionWords = /\b(send|post|publish|delete|update|create|merge|approve
 const writeWords = /\b(write|edit|modify|update|delete|create|save|append|overwrite|apply_patch)\b/i;
 const networkWords = /\b(network|http|https|api|web|external service|internet|fetch|download|upload)\b/i;
 const broadWords = /\b(any|all|every|entire|unrestricted|full access|outside the workspace)\b/i;
+const actionKinds = [
+  { name: "send", pattern: /\b(send|email|notify)\b/i },
+  { name: "post", pattern: /\b(post|publish)\b/i },
+  { name: "delete", pattern: /\bdelete\b/i },
+  { name: "update", pattern: /\bupdate\b/i },
+  { name: "create", pattern: /\bcreate\b/i },
+  { name: "merge", pattern: /\bmerge\b/i },
+  { name: "approve", pattern: /\bapprove\b/i },
+  { name: "install", pattern: /\binstall\b/i },
+  { name: "deploy", pattern: /\bdeploy\b/i },
+  { name: "charge", pattern: /\bcharge\b/i }
+] as const;
 
 export async function scanSkills(root: string, options: ScanOptions = {}): Promise<ScanResult> {
   const config: MatrixConfig = {
@@ -159,7 +171,9 @@ function buildWarnings(input: {
 }): string[] {
   const warnings: string[] = [];
   if (!/side-?effect boundaries/i.test(input.content)) warnings.push("missing side-effect boundary section");
-  if (input.externalActions.length > 0 && input.approvalRequirements.length === 0) warnings.push("live-action language without approval requirement");
+  if (input.externalActions.some((action) => !hasScopedApproval(action, input.approvalRequirements))) {
+    warnings.push("live-action language without approval requirement");
+  }
   if (input.approvalRequirements.length === 0) warnings.push("missing approval requirement");
   for (const tool of input.tools) {
     if (!input.config.allowedTools.includes(tool) && /^[a-z][a-z0-9_-]+$/.test(tool)) warnings.push(`unknown tool: ${tool}`);
@@ -167,6 +181,15 @@ function buildWarnings(input: {
   if (input.filesystemWrites.some((line) => broadWords.test(line))) warnings.push("broad filesystem write language");
   if (input.networkClaims.some((line) => broadWords.test(line))) warnings.push("broad network language");
   return unique(warnings);
+}
+
+function hasScopedApproval(action: string, approvalRequirements: string[]): boolean {
+  const kinds = actionKinds.filter(({ pattern }) => pattern.test(action)).map(({ name }) => name);
+  const [kind] = kinds;
+  return kind !== undefined && approvalRequirements.some((requirement) => {
+    if (requirement === action) return true;
+    return actionKinds.find((candidate) => candidate.name === kind)?.pattern.test(requirement) ?? false;
+  });
 }
 
 function cleanToken(token: string): string {

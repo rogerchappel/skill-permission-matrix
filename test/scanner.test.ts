@@ -8,6 +8,7 @@ import { loadConfig, renderJson, renderMarkdown, scanSkills } from "../src/index
 
 const fixtureRoot = new URL("fixtures/skills", `file://${process.cwd()}/`).pathname;
 const configPath = new URL("fixtures/skill-permission-matrix.json", `file://${process.cwd()}/`).pathname;
+const actionScopeRoot = new URL("test/fixtures/action-scope", `file://${process.cwd()}/`).pathname;
 
 describe("scanSkills", () => {
   it("discovers skills and extracts permission fields", async () => {
@@ -17,6 +18,10 @@ describe("scanSkills", () => {
     assert.ok(draft);
     assert.deepEqual(draft.tools, ["exec"]);
     assert.ok(draft.approvalRequirements.some((line) => line.includes("explicit approval")));
+    assert.ok(!draft.warnings.includes("live-action language without approval requirement"));
+    const externalWrite = result.rows.find((row) => row.name === "External Write Connector");
+    assert.ok(externalWrite);
+    assert.ok(!externalWrite.warnings.includes("live-action language without approval requirement"));
   });
 
   it("flags incomplete and broad permission language", async () => {
@@ -71,6 +76,25 @@ describe("scanSkills", () => {
     } finally {
       await rm(root, { recursive: true, force: true });
     }
+  });
+
+  it("does not let an unrelated approval suppress a live-action warning", async () => {
+    const result = await scanSkills(join(actionScopeRoot, "unrelated-approval"));
+    const [row] = result.rows;
+    assert.deepEqual(row.approvalRequirements, ["Delete files only after explicit approval."]);
+    assert.ok(row.warnings.includes("live-action language without approval requirement"));
+  });
+
+  it("warns when only one of multiple live actions has approval", async () => {
+    const result = await scanSkills(join(actionScopeRoot, "multiple-actions"));
+    const [row] = result.rows;
+    assert.ok(row.warnings.includes("live-action language without approval requirement"));
+  });
+
+  it("accepts multiple live actions with correctly scoped approvals", async () => {
+    const result = await scanSkills(join(actionScopeRoot, "scoped-approvals"));
+    const [row] = result.rows;
+    assert.ok(!row.warnings.includes("live-action language without approval requirement"));
   });
 });
 

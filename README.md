@@ -7,13 +7,13 @@ Review required tools, side effects, and approval boundaries across agent `SKILL
 ```bash
 npm install
 npm run build
-node dist/cli.js scan fixtures/skills --format markdown
+node dist/src/cli.js scan fixtures/skills --format markdown
 ```
 
 JSON output is available for release evidence or downstream checks:
 
 ```bash
-node dist/cli.js scan fixtures/skills --format json --config fixtures/skill-permission-matrix.json
+node dist/src/cli.js scan fixtures/skills --format json --config fixtures/skill-permission-matrix.json
 ```
 
 ## CLI

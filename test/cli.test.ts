@@ -9,6 +9,14 @@ import { promisify } from "node:util";
 const run = promisify(execFile);
 
 describe("cli", () => {
+  it("runs the documented quickstart command", async () => {
+    const readme = await readFile("README.md", "utf8");
+    const command = readme.match(/^node (dist\/[^\s]+) (scan .+)$/m);
+    assert.ok(command, "README quickstart must contain an executable node command");
+    const { stdout } = await run("node", [command[1], ...command[2].split(" ")]);
+    assert.match(stdout, /^# Skill Permission Matrix/m);
+  });
+
   it("renders json from fixture skills", async () => {
     const { stdout } = await run("node", ["dist/src/cli.js", "scan", "fixtures/skills", "--format", "json"]);
     const parsed = JSON.parse(stdout);

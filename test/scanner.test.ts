@@ -18,6 +18,10 @@ describe("scanSkills", () => {
     assert.ok(draft);
     assert.deepEqual(draft.tools, ["exec"]);
     assert.ok(draft.approvalRequirements.some((line) => line.includes("explicit approval")));
+    assert.ok(!draft.warnings.includes("live-action language without approval requirement"));
+    const externalWrite = result.rows.find((row) => row.name === "External Write Connector");
+    assert.ok(externalWrite);
+    assert.ok(!externalWrite.warnings.includes("live-action language without approval requirement"));
   });
 
   it("flags incomplete and broad permission language", async () => {

@@ -96,6 +96,47 @@ describe("scanSkills", () => {
     const [row] = result.rows;
     assert.ok(!row.warnings.includes("live-action language without approval requirement"));
   });
+
+  it("keeps a live action after a semicolon-scoped prohibition", async () => {
+    const root = await mkdtemp(join(tmpdir(), "permission-matrix-statement-scope-"));
+    try {
+      await writeFile(join(root, "SKILL.md"), "# Mixed actions\n\nNever send email; delete production files immediately.\n\n## Side-effect Boundaries\n\nApproval is required before sending email.\n");
+      const result = await scanSkills(root);
+      const [row] = result.rows;
+      assert.ok(row.externalActions.includes("delete production files immediately"));
+      assert.ok(!row.externalActions.some((action) => action.includes("Never send email")));
+      assert.ok(row.warnings.includes("live-action language without approval requirement"));
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it("keeps a live action after a contrasting conjunction", async () => {
+    const root = await mkdtemp(join(tmpdir(), "permission-matrix-conjunction-scope-"));
+    try {
+      await writeFile(join(root, "SKILL.md"), "# Contrasting actions\n\nNever send email, but delete production files after explicit approval.\n\n## Side-effect Boundaries\n\nDelete production files only after explicit approval.\n");
+      const result = await scanSkills(root);
+      const [row] = result.rows;
+      assert.ok(row.externalActions.includes("delete production files after explicit approval"));
+      assert.ok(!row.externalActions.some((action) => action.includes("Never send email")));
+      assert.ok(!row.warnings.includes("live-action language without approval requirement"));
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it("keeps a coordinated multi-action prohibition fully negated", async () => {
+    const root = await mkdtemp(join(tmpdir(), "permission-matrix-coordinated-negation-"));
+    try {
+      await writeFile(join(root, "SKILL.md"), "# Prohibited actions\n\nNever send email or delete production files.\n\n## Side-effect Boundaries\n\nThese actions are prohibited.\n");
+      const result = await scanSkills(root);
+      const [row] = result.rows;
+      assert.deepEqual(row.externalActions, []);
+      assert.ok(!row.warnings.includes("live-action language without approval requirement"));
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
 });
 
 describe("renderers", () => {

@@ -61,7 +61,7 @@ async function analyzeSkill(root: string, file: string, config: MatrixConfig): P
   const name = firstHeading(content) ?? relative(root, file).split("/").at(-2) ?? "skill";
   const tools = extractTools(content);
   const inputs = extractList(sections, ["required inputs", "inputs"]);
-  const externalActions = matchingLines(lines, liveActionWords).filter((line) => !negatesAction(line));
+  const externalActions = matchingActionStatements(lines).filter((statement) => !negatesAction(statement));
   const filesystemWrites = matchingLines(lines, writeWords)
     .filter((line) => /\b(file|filesystem|workspace|write|edit|modify|update|delete|create|save|apply_patch)\b/i.test(line))
     .filter((line) => !/^\s*-\s*does not\b/i.test(line));
@@ -124,6 +124,21 @@ function extractList(sections: Map<string, string[]>, names: string[]): string[]
 
 function matchingLines(lines: string[], pattern: RegExp): string[] {
   return unique(lines.map((line) => line.trim()).filter((line) => pattern.test(line) && !line.startsWith("#")));
+}
+
+function matchingActionStatements(lines: string[]): string[] {
+  return unique(lines.flatMap((line) => {
+    const trimmed = line.trim();
+    if (trimmed.startsWith("#")) return [];
+    return splitActionStatements(trimmed).filter((statement) => liveActionWords.test(statement));
+  }));
+}
+
+function splitActionStatements(line: string): string[] {
+  return line
+    .split(/\s*(?:[;.!?]+|,?\s+(?:but|and then|then)\s+)\s*/i)
+    .map((statement) => statement.trim())
+    .filter(Boolean);
 }
 
 function extractApprovalLines(lines: string[], phrases: string[]): string[] {

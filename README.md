@@ -77,6 +77,6 @@ npm run release:check
 ## Limitations
 
 - Extraction is deterministic text analysis, not a proof of runtime behavior.
-- External actions are evaluated at sentence, semicolon, and contrasting/sequential conjunction boundaries; coordinated actions joined by `and` or `or` remain in one statement so a leading prohibition applies to the full list.
+- External actions are evaluated at sentence, semicolon, and contrasting/sequential conjunction boundaries. Coordinated actions joined by `and` or `or` remain in one statement so a leading prohibition applies to the full list, while every distinct live-action kind in a permitted statement needs a matching approval requirement.
 - Unusual skill templates may need config tuning.
 - Source-code permission analysis is out of scope for V1.

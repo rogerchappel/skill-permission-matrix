@@ -203,12 +203,17 @@ function buildWarnings(input: {
 }
 
 function hasScopedApproval(action: string, approvalRequirements: string[]): boolean {
-  const kinds = actionKinds.filter(({ pattern }) => pattern.test(action)).map(({ name }) => name);
-  const [kind] = kinds;
-  return kind !== undefined && approvalRequirements.some((requirement) => {
+  const kinds = unique(action.split(/\b(?:and|or)\b/i).flatMap((clause) => {
+    const matches = actionKinds
+      .map((kind) => ({ kind, index: clause.search(kind.pattern) }))
+      .filter(({ index }) => index >= 0)
+      .sort((a, b) => a.index - b.index);
+    return matches[0]?.kind.name ?? [];
+  }));
+  return kinds.length > 0 && kinds.every((kind) => approvalRequirements.some((requirement) => {
     if (requirement === action) return true;
     return actionKinds.find((candidate) => candidate.name === kind)?.pattern.test(requirement) ?? false;
-  });
+  }));
 }
 
 function cleanToken(token: string): string {

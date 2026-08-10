@@ -97,6 +97,24 @@ describe("scanSkills", () => {
     assert.ok(!row.warnings.includes("live-action language without approval requirement"));
   });
 
+  it("warns when a coordinated and-action is only partially approved", async () => {
+    const result = await scanSkills(join(actionScopeRoot, "coordinated-and-partial"));
+    const [row] = result.rows;
+    assert.ok(row.warnings.includes("live-action language without approval requirement"));
+  });
+
+  it("warns when a coordinated or-action is only partially approved", async () => {
+    const result = await scanSkills(join(actionScopeRoot, "coordinated-or-partial"));
+    const [row] = result.rows;
+    assert.ok(row.warnings.includes("live-action language without approval requirement"));
+  });
+
+  it("accepts coordinated live actions when every kind is approved", async () => {
+    const result = await scanSkills(join(actionScopeRoot, "coordinated-fully-approved"));
+    const [row] = result.rows;
+    assert.ok(!row.warnings.includes("live-action language without approval requirement"));
+  });
+
   it("keeps a live action after a semicolon-scoped prohibition", async () => {
     const root = await mkdtemp(join(tmpdir(), "permission-matrix-statement-scope-"));
     try {

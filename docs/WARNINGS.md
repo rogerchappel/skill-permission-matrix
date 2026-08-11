@@ -8,7 +8,7 @@ Raised when no configured approval phrase appears in the skill. This is expected
 
 ## Live-action language without approval requirement
 
-Raised when verbs such as send, post, publish, delete, update, create, merge, approve, install, deploy, charge, email, or notify appear without approval language.
+Raised when verbs such as send, post, publish, delete, update, create, merge, approve, install, deploy, charge, email, or notify appear without approval language. When one statement contains multiple action kinds, including comma-separated or coordinated `and`/`or` lists, every action kind must have a matching scoped approval requirement; approval for one action does not authorize the others.
 
 ## Missing side-effect boundary section
 

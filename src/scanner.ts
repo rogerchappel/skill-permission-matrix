@@ -203,7 +203,7 @@ function buildWarnings(input: {
 }
 
 function hasScopedApproval(action: string, approvalRequirements: string[]): boolean {
-  const kinds = unique(action.split(/\b(?:and|or)\b/i).flatMap((clause) => {
+  const kinds = unique(action.split(/\s*(?:,|\b(?:and|or)\b)\s*/i).flatMap((clause) => {
     const matches = actionKinds
       .map((kind) => ({ kind, index: clause.search(kind.pattern) }))
       .filter(({ index }) => index >= 0)

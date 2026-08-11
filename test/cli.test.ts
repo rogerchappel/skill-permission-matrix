@@ -24,6 +24,14 @@ describe("cli", () => {
     assert.ok(parsed.summary.warningCount > 0);
   });
 
+  it("reports approval coverage for every action in comma-separated lists", async () => {
+    const partial = await run("node", ["dist/src/cli.js", "scan", "test/fixtures/action-scope/comma-separated-partial", "--format", "json"]);
+    const approved = await run("node", ["dist/src/cli.js", "scan", "test/fixtures/action-scope/comma-separated-fully-approved", "--format", "json"]);
+
+    assert.ok(JSON.parse(partial.stdout).rows[0].warnings.includes("live-action language without approval requirement"));
+    assert.ok(!JSON.parse(approved.stdout).rows[0].warnings.includes("live-action language without approval requirement"));
+  });
+
   it("renders markdown and writes output with documented options", async () => {
     const directory = await mkdtemp(join(tmpdir(), "skill-permission-matrix-cli-"));
     const outputPath = join(directory, "report.md");

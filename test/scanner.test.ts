@@ -115,6 +115,19 @@ describe("scanSkills", () => {
     assert.ok(!row.warnings.includes("live-action language without approval requirement"));
   });
 
+  it("warns when a comma-separated action list is only partially approved", async () => {
+    const result = await scanSkills(join(actionScopeRoot, "comma-separated-partial"));
+    const [row] = result.rows;
+    assert.ok(row.externalActions.includes("May delete files, deploy releases"));
+    assert.ok(row.warnings.includes("live-action language without approval requirement"));
+  });
+
+  it("accepts a comma-separated action list when every kind is approved", async () => {
+    const result = await scanSkills(join(actionScopeRoot, "comma-separated-fully-approved"));
+    const [row] = result.rows;
+    assert.ok(!row.warnings.includes("live-action language without approval requirement"));
+  });
+
   it("keeps a live action after a semicolon-scoped prohibition", async () => {
     const root = await mkdtemp(join(tmpdir(), "permission-matrix-statement-scope-"));
     try {

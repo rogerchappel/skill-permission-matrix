@@ -41,6 +41,38 @@ describe("scanSkills", () => {
     assert.ok(incomplete?.warnings.includes("unknown tool: unknown_connector"));
   });
 
+  it("extracts tools only from explicit declarations", async () => {
+    const root = await mkdtemp(join(tmpdir(), "permission-matrix-tools-"));
+    try {
+      await writeFile(join(root, "SKILL.md"), `# Tool declarations
+
+Use \`config.json\` with the value \`production\`.
+
+Tools: exec, \`web_fetch\`
+
+## Required Tools
+
+- \`file_fetch\`
+- message
+
+## Validation
+
+Run \`npm\` tests against \`fixture.yaml\`.
+`);
+      const result = await scanSkills(root, {
+        config: {
+          allowedTools: ["exec", "web_fetch", "file_fetch", "message"],
+          approvalPhrases: []
+        }
+      });
+      const [row] = result.rows;
+      assert.deepEqual(row.tools, ["exec", "web_fetch", "file_fetch", "message"]);
+      assert.ok(!row.warnings.some((warning) => warning.startsWith("unknown tool:")));
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
   it("does not treat negated approval statements as requirements", async () => {
     const negatedForms = [
       "No approval is required.",

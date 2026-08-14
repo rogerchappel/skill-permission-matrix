@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, it } from "node:test";
@@ -22,6 +22,30 @@ describe("cli", () => {
     const parsed = JSON.parse(stdout);
     assert.equal(parsed.summary.skillCount, 4);
     assert.ok(parsed.summary.warningCount > 0);
+  });
+
+  it("does not report inline commands as unknown tools", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "skill-permission-matrix-tools-"));
+    const skillDirectory = join(directory, "probe");
+    await mkdir(skillDirectory);
+    try {
+      await writeFile(join(skillDirectory, "SKILL.md"), `# Probe
+
+## Tools
+
+- \`exec\`
+
+## Validation
+
+Run \`npm\` tests.
+`);
+      const { stdout } = await run("node", ["dist/src/cli.js", "scan", directory, "--format", "json"]);
+      const [row] = JSON.parse(stdout).rows;
+      assert.deepEqual(row.tools, ["exec"]);
+      assert.ok(!row.warnings.includes("unknown tool: npm"));
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
   });
 
   it("reports approval coverage for every action in comma-separated lists", async () => {

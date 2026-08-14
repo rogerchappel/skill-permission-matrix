@@ -48,6 +48,17 @@ The scanner finds every `SKILL.md` under the target directory and reports:
 - validation commands
 - review warnings
 
+Tools are extracted only from explicit declarations. Use a `Tools` or `Required Tools` heading with a plain or backticked list:
+
+```markdown
+## Required Tools
+
+- `exec`
+- file_fetch
+```
+
+For a compact declaration, use `Tools: exec, file_fetch` (or `Required Tools:`). Inline code elsewhere, including commands, filenames, and configuration values, is not treated as a tool declaration. `allowedTools` controls which extracted names produce an unknown-tool warning; it does not add declarations to a skill.
+
 ## Config
 
 Create `skill-permission-matrix.json` when a project has a known tool set or preferred approval phrases.

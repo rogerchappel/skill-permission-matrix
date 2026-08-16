@@ -112,9 +112,35 @@ function firstHeading(content: string): string | undefined {
 }
 
 function extractTools(content: string): string[] {
-  const explicit = [...content.matchAll(/`([a-z][a-z0-9_-]+)`/gi)].map((match) => match[1]);
-  const toolLine = content.match(/(?:tools?|required tools?)\s*:\s*([^\n]+)/i)?.[1]?.split(/[,\s]+/) ?? [];
-  return unique([...explicit, ...toolLine].map(cleanToken).filter(Boolean));
+  const tools: string[] = [];
+  let inToolSection = false;
+
+  for (const line of content.split(/\r?\n/)) {
+    const heading = line.match(/^#{1,3}\s+(.+?)\s*$/);
+    if (heading) {
+      inToolSection = /^(?:required\s+)?tools?$/i.test(heading[1]);
+      continue;
+    }
+
+    const labeled = line.match(/^\s*(?:[-*]\s*)?(?:required\s+)?tools?\s*:\s*(.+)$/i);
+    if (labeled) {
+      tools.push(...parseToolList(labeled[1]));
+      continue;
+    }
+
+    if (inToolSection && /^\s*(?:[-*]\s*)?`?[a-z][a-z0-9_-]*`?(?:\s*,\s*`?[a-z][a-z0-9_-]*`?)*\s*$/i.test(line)) {
+      tools.push(...parseToolList(line.replace(/^\s*[-*]\s*/, "")));
+    }
+  }
+
+  return unique(tools);
+}
+
+function parseToolList(value: string): string[] {
+  return value
+    .split(/\s*,\s*|\s+/)
+    .map(cleanToken)
+    .filter((token) => /^[a-z][a-z0-9_-]*$/i.test(token));
 }
 
 function extractList(sections: Map<string, string[]>, names: string[]): string[] {

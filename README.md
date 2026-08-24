@@ -70,6 +70,8 @@ Create `skill-permission-matrix.json` when a project has a known tool set or pre
 }
 ```
 
+The config must be a JSON object. Both fields are optional; omitted fields use the built-in defaults. When present, `allowedTools` and `approvalPhrases` must each be an array containing only strings. Invalid shapes exit nonzero with a field-specific diagnostic such as `Config field approvalPhrases must be an array of strings`.
+
 ## Safety Notes
 
 This tool is local-first and read-only. It does not install, apply, approve, publish, or edit skills. It does not call external services. Treat warnings as review prompts, not as a runtime sandbox.

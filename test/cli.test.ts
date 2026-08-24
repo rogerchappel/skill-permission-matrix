@@ -86,4 +86,22 @@ Run \`npm\` tests.
       });
     });
   }
+
+  it("reports malformed config fields without an internal error", async () => {
+    const root = await mkdtemp(join(tmpdir(), "permission-matrix-cli-config-"));
+    try {
+      const configPath = join(root, "config.json");
+      await writeFile(configPath, JSON.stringify({ approvalPhrases: "approval" }));
+      await assert.rejects(
+        run("node", ["dist/src/cli.js", "scan", "fixtures/skills", "--config", configPath]),
+        (error: unknown) => {
+          assert.ok(error && typeof error === "object" && "stderr" in error);
+          assert.equal((error as { stderr: string }).stderr, "Config field approvalPhrases must be an array of strings\n");
+          return true;
+        }
+      );
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
 });

@@ -20,7 +20,7 @@ describe("cli", () => {
   it("renders json from fixture skills", async () => {
     const { stdout } = await run("node", ["dist/src/cli.js", "scan", "fixtures/skills", "--format", "json"]);
     const parsed = JSON.parse(stdout);
-    assert.equal(parsed.summary.skillCount, 4);
+    assert.equal(parsed.summary.skillCount, 5);
     assert.ok(parsed.summary.warningCount > 0);
   });
 

@@ -191,7 +191,7 @@ function negatesApproval(line: string, phrase: string): boolean {
 }
 
 function negatesAction(line: string): boolean {
-  return /^\s*[-*]?\s*(?:do(?:es)? not|never|must not|cannot|can't)\b/i.test(line);
+  return /(?:^|\s)(?:do(?:es)? not|never|must not|cannot|can't)\s+(?:\w+\s+){0,2}(?:send(?:s|ing)?|sent|post(?:s|ed|ing)?|publish(?:es|ed|ing)?|delet(?:e|es|ed|ing)|updat(?:e|es|ed|ing)|creat(?:e|es|ed|ing)|merg(?:e|es|ed|ing)|approv(?:e|es|ed|ing)|install(?:s|ed|ing)?|deploy(?:s|ed|ing)?|charg(?:e|es|ed|ing)|email(?:s|ed|ing)?|notif(?:y|ies|ied|ying))\b/i.test(line);
 }
 
 function extractCodeCommands(content: string): string[] {

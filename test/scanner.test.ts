@@ -200,6 +200,33 @@ Run \`npm\` tests against \`fixture.yaml\`.
       await rm(root, { recursive: true, force: true });
     }
   });
+
+  it("ignores subject-prefixed coordinated prohibitions", async () => {
+    const root = await mkdtemp(join(tmpdir(), "permission-matrix-subject-negation-"));
+    try {
+      await writeFile(join(root, "SKILL.md"), "# Prohibited actions\n\nThe skill does not publish packages or send messages.\n\n## Side-effect Boundaries\n\nThese actions are prohibited.\n");
+      const result = await scanSkills(root);
+      const [row] = result.rows;
+      assert.deepEqual(row.externalActions, []);
+      assert.ok(!row.warnings.includes("live-action language without approval requirement"));
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it("keeps an affirmative action after a subject-prefixed prohibition boundary", async () => {
+    const root = await mkdtemp(join(tmpdir(), "permission-matrix-subject-negation-boundary-"));
+    try {
+      await writeFile(join(root, "SKILL.md"), "# Mixed actions\n\nThe skill does not publish packages, but sends the report immediately.\n\n## Side-effect Boundaries\n\nPublishing is prohibited.\n");
+      const result = await scanSkills(root);
+      const [row] = result.rows;
+      assert.ok(row.externalActions.includes("sends the report immediately"));
+      assert.ok(!row.externalActions.some((action) => action.includes("does not publish")));
+      assert.ok(row.warnings.includes("live-action language without approval requirement"));
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
 });
 
 describe("renderers", () => {

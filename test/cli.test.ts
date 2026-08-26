@@ -56,6 +56,19 @@ Run \`npm\` tests.
     assert.ok(!JSON.parse(approved.stdout).rows[0].warnings.includes("live-action language without approval requirement"));
   });
 
+  it("does not report subject-prefixed prohibitions as external actions", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "skill-permission-matrix-negation-"));
+    try {
+      await writeFile(join(directory, "SKILL.md"), "# Prohibited actions\n\nThe skill does not publish packages or send messages.\n\n## Side-effect Boundaries\n\nThese actions are prohibited.\n");
+      const { stdout } = await run("node", ["dist/src/cli.js", "scan", directory, "--format", "json"]);
+      const [row] = JSON.parse(stdout).rows;
+      assert.deepEqual(row.externalActions, []);
+      assert.ok(!row.warnings.includes("live-action language without approval requirement"));
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
+
   it("renders markdown and writes output with documented options", async () => {
     const directory = await mkdtemp(join(tmpdir(), "skill-permission-matrix-cli-"));
     const outputPath = join(directory, "report.md");

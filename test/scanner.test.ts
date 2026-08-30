@@ -252,6 +252,36 @@ Run \`npm\` tests against \`fixture.yaml\`.
       await rm(root, { recursive: true, force: true });
     }
   });
+
+  for (const statement of [
+    "The skill will not send email.",
+    "Sending email is prohibited.",
+    "The skill will not publish packages or send messages."
+  ]) {
+    it(`ignores the prohibition: ${statement}`, async () => {
+      const root = await mkdtemp(join(tmpdir(), "permission-matrix-common-prohibition-"));
+      try {
+        await writeFile(join(root, "SKILL.md"), `# Prohibited actions\n\n${statement}\n\n## Side-effect Boundaries\n\nExternal actions are prohibited.\n`);
+        const [row] = (await scanSkills(root)).rows;
+        assert.deepEqual(row.externalActions, []);
+        assert.ok(!row.warnings.includes("live-action language without approval requirement"));
+      } finally {
+        await rm(root, { recursive: true, force: true });
+      }
+    });
+  }
+
+  it("keeps an affirmative action after a common prohibition boundary", async () => {
+    const root = await mkdtemp(join(tmpdir(), "permission-matrix-common-prohibition-boundary-"));
+    try {
+      await writeFile(join(root, "SKILL.md"), "# Mixed actions\n\nThe skill will not send email, but deploys releases immediately.\n\n## Side-effect Boundaries\n\nSending email is prohibited.\n");
+      const [row] = (await scanSkills(root)).rows;
+      assert.deepEqual(row.externalActions, ["deploys releases immediately"]);
+      assert.ok(row.warnings.includes("live-action language without approval requirement"));
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
 });
 
 describe("renderers", () => {

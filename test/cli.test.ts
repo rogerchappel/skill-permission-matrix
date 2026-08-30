@@ -71,6 +71,13 @@ Run \`npm\` tests.
     }
   });
 
+  it("does not report common packaged prohibition forms as external actions", async () => {
+    const { stdout } = await run("node", ["dist/src/cli.js", "scan", "test/fixtures/action-scope/common-prohibitions", "--format", "json"]);
+    const [row] = JSON.parse(stdout).rows;
+    assert.deepEqual(row.externalActions, []);
+    assert.ok(!row.warnings.includes("live-action language without approval requirement"));
+  });
+
   it("renders markdown and writes output with documented options", async () => {
     const directory = await mkdtemp(join(tmpdir(), "skill-permission-matrix-cli-"));
     const outputPath = join(directory, "report.md");

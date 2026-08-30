@@ -90,6 +90,6 @@ npm run release:check
 ## Limitations
 
 - Extraction is deterministic text analysis, not a proof of runtime behavior.
-- External actions are evaluated at sentence, semicolon, and contrasting/sequential conjunction boundaries. Coordinated actions joined by `and` or `or` remain in one statement, so a prohibition before the action verbs—including natural subject-prefixed wording such as `The skill does not publish or send`—applies to the full list. Every distinct live-action kind in a permitted statement still needs a matching approval requirement.
+- External actions are evaluated at sentence, semicolon, and contrasting/sequential conjunction boundaries. Approval coverage also respects comma scope: a comma-separated follow-on action needs its own approval language, so `Approval is required before publishing, delete files automatically` does not approve deletion. Coordinated actions joined by `and` or `or` remain in one statement, so compound requirements such as `Publishing and deleting require explicit approval` cover both actions, while a prohibition before the action verbs—including natural subject-prefixed wording such as `The skill does not publish or send`—applies to the full list. Every distinct live-action kind in a permitted statement still needs a matching approval requirement.
 - Unusual skill templates may need config tuning.
 - Source-code permission analysis is out of scope for V1.

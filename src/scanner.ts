@@ -216,7 +216,7 @@ function buildWarnings(input: {
 }): string[] {
   const warnings: string[] = [];
   if (!/side-?effect boundaries/i.test(input.content)) warnings.push("missing side-effect boundary section");
-  if (input.externalActions.some((action) => !hasScopedApproval(action, input.approvalRequirements))) {
+  if (input.externalActions.some((action) => !hasScopedApproval(action, input.approvalRequirements, input.config.approvalPhrases))) {
     warnings.push("live-action language without approval requirement");
   }
   if (input.approvalRequirements.length === 0) warnings.push("missing approval requirement");
@@ -228,7 +228,7 @@ function buildWarnings(input: {
   return unique(warnings);
 }
 
-function hasScopedApproval(action: string, approvalRequirements: string[]): boolean {
+function hasScopedApproval(action: string, approvalRequirements: string[], approvalPhrases: string[]): boolean {
   const kinds = unique(action.split(/\s*(?:,|\b(?:and|or)\b)\s*/i).flatMap((clause) => {
     const matches = actionKinds
       .map((kind) => ({ kind, index: clause.search(kind.pattern) }))
@@ -237,8 +237,10 @@ function hasScopedApproval(action: string, approvalRequirements: string[]): bool
     return matches[0]?.kind.name ?? [];
   }));
   return kinds.length > 0 && kinds.every((kind) => approvalRequirements.some((requirement) => {
-    if (requirement === action) return true;
-    return actionKinds.find((candidate) => candidate.name === kind)?.pattern.test(requirement) ?? false;
+    const pattern = actionKinds.find((candidate) => candidate.name === kind)?.pattern;
+    return pattern ? requirement.split(/\s*,\s*/).some((clause) =>
+      pattern.test(clause) && extractApprovalLines([clause], approvalPhrases).length > 0
+    ) : false;
   }));
 }
 

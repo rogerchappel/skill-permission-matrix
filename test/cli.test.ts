@@ -51,9 +51,11 @@ Run \`npm\` tests.
   it("reports approval coverage for every action in comma-separated lists", async () => {
     const partial = await run("node", ["dist/src/cli.js", "scan", "test/fixtures/action-scope/comma-separated-partial", "--format", "json"]);
     const approved = await run("node", ["dist/src/cli.js", "scan", "test/fixtures/action-scope/comma-separated-fully-approved", "--format", "json"]);
+    const followOn = await run("node", ["dist/src/cli.js", "scan", "test/fixtures/action-scope/comma-follow-on-unapproved", "--format", "json"]);
 
     assert.ok(JSON.parse(partial.stdout).rows[0].warnings.includes("live-action language without approval requirement"));
     assert.ok(!JSON.parse(approved.stdout).rows[0].warnings.includes("live-action language without approval requirement"));
+    assert.ok(JSON.parse(followOn.stdout).rows[0].warnings.includes("live-action language without approval requirement"));
   });
 
   it("does not report subject-prefixed prohibitions as external actions", async () => {

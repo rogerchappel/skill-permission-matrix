@@ -160,6 +160,31 @@ Run \`npm\` tests against \`fixture.yaml\`.
     assert.ok(!row.warnings.includes("live-action language without approval requirement"));
   });
 
+  it("does not extend approval across a comma-separated follow-on action", async () => {
+    const root = await mkdtemp(join(tmpdir(), "permission-matrix-comma-approval-scope-"));
+    try {
+      await writeFile(join(root, "SKILL.md"), "# Mixed approval scope\n\n## Side-effect Boundaries\n\nApproval is required before publishing, delete files automatically.\n");
+      const result = await scanSkills(root);
+      const [row] = result.rows;
+      assert.deepEqual(row.approvalRequirements, ["Approval is required before publishing, delete files automatically."]);
+      assert.ok(row.warnings.includes("live-action language without approval requirement"));
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it("keeps coordinated approval requirements scoped to every action", async () => {
+    const root = await mkdtemp(join(tmpdir(), "permission-matrix-compound-approval-scope-"));
+    try {
+      await writeFile(join(root, "SKILL.md"), "# Compound approval scope\n\n## Side-effect Boundaries\n\nPublishing and deleting require explicit approval.\n");
+      const result = await scanSkills(root);
+      const [row] = result.rows;
+      assert.ok(!row.warnings.includes("live-action language without approval requirement"));
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
   it("keeps a live action after a semicolon-scoped prohibition", async () => {
     const root = await mkdtemp(join(tmpdir(), "permission-matrix-statement-scope-"));
     try {

@@ -191,7 +191,10 @@ function negatesApproval(line: string, phrase: string): boolean {
 }
 
 function negatesAction(line: string): boolean {
-  return /(?:^|\s)(?:do(?:es)? not|never|must not|cannot|can't)\s+(?:\w+\s+){0,2}(?:send(?:s|ing)?|sent|post(?:s|ed|ing)?|publish(?:es|ed|ing)?|delet(?:e|es|ed|ing)|updat(?:e|es|ed|ing)|creat(?:e|es|ed|ing)|merg(?:e|es|ed|ing)|approv(?:e|es|ed|ing)|install(?:s|ed|ing)?|deploy(?:s|ed|ing)?|charg(?:e|es|ed|ing)|email(?:s|ed|ing)?|notif(?:y|ies|ied|ying))\b/i.test(line);
+  const action = "(?:send(?:s|ing)?|sent|post(?:s|ed|ing)?|publish(?:es|ed|ing)?|delet(?:e|es|ed|ing)|updat(?:e|es|ed|ing)|creat(?:e|es|ed|ing)|merg(?:e|es|ed|ing)|approv(?:e|es|ed|ing)|install(?:s|ed|ing)?|deploy(?:s|ed|ing)?|charg(?:e|es|ed|ing)|email(?:s|ed|ing)?|notif(?:y|ies|ied|ying))";
+  const directProhibition = new RegExp(`(?:^|\\s)(?:do(?:es)? not|never|must not|cannot|can't|will not|won't)\\s+(?:\\w+\\s+){0,2}${action}\\b`, "i");
+  const passiveProhibition = new RegExp(`(?:^|\\s)${action}\\b(?:\\s+[\\w-]+){0,6}\\s+(?:is|are)\\s+prohibited\\b`, "i");
+  return directProhibition.test(line) || passiveProhibition.test(line);
 }
 
 function extractCodeCommands(content: string): string[] {

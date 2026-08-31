@@ -282,6 +282,15 @@ Run \`npm\` tests against \`fixture.yaml\`.
       await rm(root, { recursive: true, force: true });
     }
   });
+
+  it("scopes approval evidence to its sentence", async () => {
+    const partial = await scanSkills("test/fixtures/action-scope/sentence-follow-on-unapproved");
+    const approved = await scanSkills("test/fixtures/action-scope/sentence-separated-fully-approved");
+
+    assert.ok(partial.rows[0].warnings.includes("live-action language without approval requirement"));
+    assert.deepEqual(partial.rows[0].approvalRequirements, ["Approval is required before deleting local drafts."]);
+    assert.ok(!approved.rows[0].warnings.includes("live-action language without approval requirement"));
+  });
 });
 
 describe("renderers", () => {

@@ -58,6 +58,14 @@ Run \`npm\` tests.
     assert.ok(JSON.parse(followOn.stdout).rows[0].warnings.includes("live-action language without approval requirement"));
   });
 
+  it("does not carry approval across sentence boundaries", async () => {
+    const partial = await run("node", ["dist/src/cli.js", "scan", "test/fixtures/action-scope/sentence-follow-on-unapproved", "--format", "json"]);
+    const approved = await run("node", ["dist/src/cli.js", "scan", "test/fixtures/action-scope/sentence-separated-fully-approved", "--format", "json"]);
+
+    assert.ok(JSON.parse(partial.stdout).rows[0].warnings.includes("live-action language without approval requirement"));
+    assert.ok(!JSON.parse(approved.stdout).rows[0].warnings.includes("live-action language without approval requirement"));
+  });
+
   it("does not report subject-prefixed prohibitions as external actions", async () => {
     const directory = await mkdtemp(join(tmpdir(), "skill-permission-matrix-negation-"));
     try {

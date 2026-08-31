@@ -169,11 +169,18 @@ function splitActionStatements(line: string): string[] {
 
 function extractApprovalLines(lines: string[], phrases: string[]): string[] {
   const lowered = phrases.map((phrase) => phrase.toLowerCase());
-  return unique(lines.map((line) => line.trim()).filter((line) => {
-    if (line.startsWith("#")) return false;
-    const normalized = line.toLowerCase().replace(/[’]/g, "'");
-    return lowered.some((phrase) => normalized.includes(phrase) && !negatesApproval(normalized, phrase));
+  return unique(lines.flatMap((line) => {
+    const trimmed = line.trim();
+    if (trimmed.startsWith("#")) return [];
+    return splitSentences(trimmed).filter((statement) => {
+      const normalized = statement.toLowerCase().replace(/[’]/g, "'");
+      return lowered.some((phrase) => normalized.includes(phrase) && !negatesApproval(normalized, phrase));
+    });
   }));
+}
+
+function splitSentences(line: string): string[] {
+  return line.match(/[^.!?]+[.!?]+|[^.!?]+$/g)?.map((statement) => statement.trim()).filter(Boolean) ?? [];
 }
 
 function negatesApproval(line: string, phrase: string): boolean {

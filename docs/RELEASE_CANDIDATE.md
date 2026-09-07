@@ -10,7 +10,12 @@ Verification planned for every release-candidate PR:
 - `npm test`
 - `npm run build`
 - `npm run smoke`
+- `npm run package:smoke`
+- `npm run docs:smoke`
 - CLI fixture smoke with Markdown and JSON output
+
+Publication status: the package is not yet available from the npm registry.
+Release candidates are installed from a locally generated `npm pack` tarball.
 
 Known limits:
 

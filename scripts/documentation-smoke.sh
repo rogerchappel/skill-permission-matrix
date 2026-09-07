@@ -32,7 +32,7 @@ NODE
   cd "$consumer_dir"
   npm init --yes >/dev/null
   npm install --ignore-scripts --no-audit --no-fund "$package_dir/$tarball_name" >/dev/null
-  npx --no-install skill-permission-matrix --help >/dev/null
+  ./node_modules/.bin/skill-permission-matrix --help >/dev/null
   node --input-type=module -e '
     import assert from "node:assert/strict";
     const { scanSkills } = await import("skill-permission-matrix");

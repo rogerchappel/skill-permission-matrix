@@ -9,6 +9,12 @@ import { promisify } from "node:util";
 const run = promisify(execFile);
 
 describe("cli", () => {
+  it("prints help successfully", async () => {
+    const { stdout, stderr } = await run("node", ["dist/src/cli.js", "--help"]);
+    assert.match(stdout, /^Usage: skill-permission-matrix/);
+    assert.equal(stderr, "");
+  });
+
   it("runs the documented quickstart command", async () => {
     const readme = await readFile("README.md", "utf8");
     const command = readme.match(/^node (dist\/[^\s]+) (scan .+)$/m);

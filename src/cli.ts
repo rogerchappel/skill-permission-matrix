@@ -15,6 +15,10 @@ interface CliArgs {
 class UsageError extends Error {}
 
 async function main(): Promise<void> {
+  if (process.argv.slice(2).length === 1 && process.argv[2] === "--help") {
+    usage(process.stdout);
+    return;
+  }
   const args = parseArgs(process.argv.slice(2));
   if (args.command !== "scan" || !args.dir) {
     usage();
@@ -55,8 +59,8 @@ function parseFormat(value: string | undefined): OutputFormat {
   throw new UsageError(`Unsupported format: ${value ?? ""}`);
 }
 
-function usage(): void {
-  process.stderr.write("Usage: skill-permission-matrix scan <dir> [--format markdown|json] [--config file] [--out file]\n");
+function usage(stream: NodeJS.WritableStream = process.stderr): void {
+  stream.write("Usage: skill-permission-matrix scan <dir> [--format markdown|json] [--config file] [--out file]\n");
 }
 
 main().catch((error: unknown) => {

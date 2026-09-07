@@ -4,13 +4,26 @@ Review required tools, side effects, and approval boundaries across agent `SKILL
 
 ## Quickstart
 
-Install the package to use the CLI or library; the published tarball includes the
-compiled runtime, so consumers do not need to run a separate build:
+The package is not published to the npm registry yet. Until it is published,
+create an installable tarball from a source checkout and install that tarball in
+your project:
 
 ```bash
-npm install skill-permission-matrix
-skill-permission-matrix --help
+git clone https://github.com/rogerchappel/skill-permission-matrix.git
+cd skill-permission-matrix
+npm ci
+npm pack
 ```
+
+Then, from the consumer project (replace the tarball path as needed):
+
+```bash
+npm install ../skill-permission-matrix/skill-permission-matrix-0.1.0.tgz
+npx skill-permission-matrix --help
+```
+
+Registry installation with `npm install skill-permission-matrix` will become
+available only after the first npm publication.
 
 When working from a source checkout, install dependencies and build before running
 the CLI directly:
@@ -40,7 +53,8 @@ write the selected format to standard output, or to the `--out` file when suppli
 
 ## Library API
 
-The package exports `loadConfig`, `renderJson`, `renderMarkdown`, and `scanSkills`:
+The installed tarball exports `loadConfig`, `renderJson`, `renderMarkdown`, and
+`scanSkills`:
 
 ```js
 import { scanSkills } from "skill-permission-matrix";

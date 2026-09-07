@@ -4,6 +4,17 @@ Review required tools, side effects, and approval boundaries across agent `SKILL
 
 ## Quickstart
 
+Install the package to use the CLI or library; the published tarball includes the
+compiled runtime, so consumers do not need to run a separate build:
+
+```bash
+npm install skill-permission-matrix
+skill-permission-matrix --help
+```
+
+When working from a source checkout, install dependencies and build before running
+the CLI directly:
+
 ```bash
 npm install
 npm run build
@@ -86,6 +97,11 @@ npm run smoke
 npm run package:smoke
 npm run release:check
 ```
+
+`npm run package:smoke` removes any existing build output, packs from that clean
+state, installs the resulting tarball into a fresh consumer, and verifies its CLI
+and library import. The package `prepack` lifecycle builds `dist/src`, so `npm pack`
+from a clean checkout produces a usable package without a prior manual build.
 
 ## Limitations
 

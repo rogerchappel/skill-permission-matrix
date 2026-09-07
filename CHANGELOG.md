@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## Unreleased
 
 - Exclude subject-prefixed natural prohibitions from external-action findings while preserving affirmative actions after statement boundaries.
+- Build distributable files during `npm pack` and verify a clean tarball install through both the CLI and library entry point.
 
 ## 0.1.0 - 2026-06-29
 

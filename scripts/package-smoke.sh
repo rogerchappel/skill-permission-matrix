@@ -9,7 +9,8 @@ consumer_dir="$smoke_root/consumer"
 mkdir -p "$package_dir" "$consumer_dir"
 
 pack_manifest="$smoke_root/pack-manifest.json"
-npm pack --dry-run --json >"$pack_manifest"
+rm -rf dist
+npm pack --json --pack-destination "$package_dir" >"$pack_manifest"
 node --input-type=module - "$pack_manifest" <<'NODE'
   import assert from "node:assert/strict";
   import { readFile } from "node:fs/promises";
@@ -30,12 +31,20 @@ node --input-type=module - "$pack_manifest" <<'NODE'
   );
 NODE
 
-tarball_name="$(npm pack --silent --pack-destination "$package_dir")"
+tarball_name="$(node --input-type=module - "$pack_manifest" <<'NODE'
+  import { readFile } from "node:fs/promises";
+
+  const [manifestPath] = process.argv.slice(2);
+  const [{ filename }] = JSON.parse(await readFile(manifestPath, "utf8"));
+  process.stdout.write(filename);
+NODE
+)"
 
 (
   cd "$consumer_dir"
   npm init --yes >/dev/null
   npm install --ignore-scripts --no-audit --no-fund "$package_dir/$tarball_name" >/dev/null
+  ./node_modules/.bin/skill-permission-matrix --help >/dev/null
   node --input-type=module -e '
     import assert from "node:assert/strict";
     const library = await import("skill-permission-matrix");

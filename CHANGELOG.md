@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 - Exclude subject-prefixed natural prohibitions from external-action findings while preserving affirmative actions after statement boundaries.
 - Build distributable files during `npm pack` and verify a clean tarball install through both the CLI and library entry point.
+- Correct pre-publication installation guidance and verify the documented packed-tarball consumer flow.
 
 ## 0.1.0 - 2026-06-29
 

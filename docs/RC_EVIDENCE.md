@@ -6,6 +6,11 @@
 - `npm test`: passed, 5 tests
 - `npm run build`: passed
 - `npm run smoke`: passed, fixture scan reported four skills and warnings for incomplete broad-permission content
+- `npm run package:smoke`: planned, clean packed-artifact consumer verification
+- `npm run docs:smoke`: planned, pre-publication README install and import verification
+
+The package remains unpublished; this evidence describes a release candidate,
+not an npm registry release.
 
 ## Review Focus
 

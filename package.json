@@ -36,7 +36,8 @@
     "smoke": "npm run build && node dist/src/cli.js scan fixtures/skills --format markdown",
     "validate": "bash scripts/validate.sh",
     "package:smoke": "bash scripts/package-smoke.sh",
-    "release:check": "npm run check && npm test && npm run smoke && npm run validate && npm run package:smoke",
+    "docs:smoke": "bash scripts/documentation-smoke.sh",
+    "release:check": "npm run check && npm test && npm run smoke && npm run validate && npm run package:smoke && npm run docs:smoke",
     "lint": "npm run check"
   },
   "keywords": [
